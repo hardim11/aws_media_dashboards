@@ -20,14 +20,14 @@ def logger(message):
 
 cw = CloudwatchDashboard(AWS_REGION, AWS_PROFILE)
 
-# emx = EmxDashboard(AWS_REGION, AWS_PROFILE, logger)
-# emx_widgets = emx.get_dashboards("")
-# cw.publish_dashboard("MyDashboardEMX", emx_widgets)
+emx = EmxDashboard(AWS_REGION, AWS_PROFILE, logger)
+emx_widgets = emx.get_dashboards("")
+cw.publish_dashboard("MediaConnect_Flows-Python", emx_widgets)
 
-# eml = EmlDashboard(AWS_REGION, AWS_PROFILE, logger)
-# eml_widgets = eml.get_dashboards("")
-# cw.publish_dashboard("MyDashboardEML", eml_widgets)
+eml = EmlDashboard(AWS_REGION, AWS_PROFILE, logger)
+eml_widgets = eml.get_dashboards("")
+cw.publish_dashboard("MediaLive_Inputs-Python", eml_widgets)
 
-emp = EmlDashboard(AWS_REGION, AWS_PROFILE, logger)
+emp = EmpDashboard(AWS_REGION, AWS_PROFILE, logger)
 emp_widgets = emp.get_dashboards("")
-cw.publish_dashboard("MyDashboardEMP", emp_widgets)
+cw.publish_dashboard("MediaPackage_Channels-Python", emp_widgets)

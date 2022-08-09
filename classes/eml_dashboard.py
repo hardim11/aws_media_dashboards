@@ -7,8 +7,8 @@
 """
 
 from datetime import datetime
-import json
 import boto3
+
 
 TAG_KEY="Product"
 EML_NetworkIn_widget_d = {
@@ -66,7 +66,8 @@ EML_Fillframes_widget_d = {
         "view": "timeSeries",
         "stacked": False,
         "region": "us-west-2",
-        "title": "Ms of Fill frames inserted on outputs [rolling avg] - indicates possible input issue",
+        "title":
+        "Ms of Fill frames inserted on outputs [rolling avg] - indicates possible input issue",
         "stat": "Average",
         "period": 60,
         "legend": {
@@ -196,7 +197,6 @@ RTP_widget_d = {
 }
 
 
-
 class EmlDashboard:
     """
     a class to create Elemental Media Live dashboard
@@ -266,13 +266,19 @@ class EmlDashboard:
         return output
 
 
-    def get_channel_dashboard(self, channel, widgets_list):
+    def add_channel_dashboard(self, channel, widgets_list):
         """
         build dashboard for 1 flow
         """
-        metric_template_line = [ "...", "nextchannelID", "Pipeline", "nextpipevalue", { "label": "labelvalue" } ]
-        #this_flowname = (channel['Name'])
-        this_flowarn = (channel['Arn'])
+        metric_template_line = [
+            "...",
+            "nextchannelID",
+            "Pipeline",
+            "nextpipevalue",
+            { "label": "labelvalue" }
+        ]
+        channel_name = channel['Name']
+        this_flowarn = channel['Arn']
         arn_split = this_flowarn.split(":")
         region = arn_split[3]
         channel_id = channel["Id"]
@@ -339,49 +345,59 @@ class EmlDashboard:
                 # first line of RTP metric
                 rtp_widget_list[0]['properties']['metrics'][0][3] = channel_id
                 rtp_widget_list[0]['properties']['metrics'][0][5] = "0"
-                rtp_widget_list[0]['properties']['metrics'][0][6]['label'] = "Pkts-Recvd_CH:"+channel_id+"_PL0"
+                rtp_widget_list[0]['properties']['metrics'][0][6]['label'] = \
+                    "Pkts-Recvd_CH:"+channel_id+"_PL0"
                 ## second line of RTP Metric
                 rtp_widget_list[0]['properties']['metrics'][1][3] = channel_id
                 rtp_widget_list[0]['properties']['metrics'][1][5] = "0"
-                rtp_widget_list[0]['properties']['metrics'][1][6]['label'] = "Pkts-RecoveredViaFec_CH:"+channel_id+"_PL0"
+                rtp_widget_list[0]['properties']['metrics'][1][6]['label'] = \
+                    "Pkts-RecoveredViaFec_CH:"+channel_id+"_PL0"
                 ## third line of RTP metric
                 rtp_widget_list[0]['properties']['metrics'][2][3] = channel_id
                 rtp_widget_list[0]['properties']['metrics'][2][5] = "0"
-                rtp_widget_list[0]['properties']['metrics'][2][6]['label'] = "Pkts-Lost_CH:"+channel_id+"_PL0"
+                rtp_widget_list[0]['properties']['metrics'][2][6]['label'] = \
+                    "Pkts-Lost_CH:"+channel_id+"_PL0"
                 ## title of Metric
-                rtp_widget_list[0]['properties']['title'] = f"RTP Packet Status for Channel:{channel_id}, Input:{this_input_name}"
+                rtp_widget_list[0]['properties']['title'] = \
+                    f"RTP Packet Status for Channel:{channel_id}, Input:{this_input_name}"
 
                 self._rtp_widgets_list.append(rtp_widget_list[0])
                 self._total_rtp_widgets+=1
 
         # handle pipeline0 first
-        this_label = "CH:" + channel_id + "_PL:0"
+        this_label = "CH:" + channel_name + "_PL:0"
         if self._total_pipelines == 0 :
             # special case for first line of each metric due to param counts
-            for counter in range ( 0, len(widgets_list) ) :
-                widgets_list[counter]['properties']['metrics'][0][3] = channel_id
-                widgets_list[counter]['properties']['metrics'][0][5] = "0"
-                widgets_list[counter]['properties']['metrics'][0][6]['label'] = this_label
-                widgets_list[counter]['properties']['region']= region
+            for a_widget in widgets_list:
+                a_widget['properties']['metrics'][0][3] = channel_id
+                a_widget['properties']['metrics'][0][5] = "0"
+                a_widget['properties']['metrics'][0][6]['label'] = this_label
+                a_widget['properties']['region']= region
 
         else:
             ## we are in rows 2-N, so add a line to each metric:
             #print("\n","Adding a row to each widget for channel",chanID)
-            for counter in range (0,len(widgets_list)) :
-                widgets_list[counter]['properties']['metrics'].append(metric_template_line)
+            for a_widget in widgets_list:
+                a_widget['properties']['metrics'].append(metric_template_line)
 
             ## now set the values
-            for counter in range (0,len(widgets_list)) :
-                widgets_list[counter]['properties']['metrics'][self._total_pipelines][1] = channel_id
-                widgets_list[counter]['properties']['metrics'][self._total_pipelines][3] = "0"
-                widgets_list[counter]['properties']['metrics'][self._total_pipelines][4]['label'] = this_label
+            for a_widget in widgets_list:
+                a_widget['properties']['metrics'][self._total_pipelines][1] = channel_id
+                a_widget['properties']['metrics'][self._total_pipelines][3] = "0"
+                a_widget['properties']['metrics'][self._total_pipelines][4]['label'] = this_label
 
         if channel['ChannelClass'] == 'STANDARD':
             self._total_pipelines = self._total_pipelines + 1
-            metric_template_line = [ "...", "nextchannelID", "Pipeline", "nextpipevalue", { "label": "labelvalue" } ]
-            thislabel = "CH:"+ channel_id + "_PL:1"
-            for counter in range (0,len(widgets_list)) :
-                widgets_list[counter]['properties']['metrics'].append(metric_template_line)
+            metric_template_line = [
+                "...",
+                "nextchannelID",
+                "Pipeline",
+                "nextpipevalue",
+                { "label": "labelvalue" }
+            ]
+            thislabel = "CH:"+ channel_name + "_PL:1"
+            for a_widget in widgets_list:
+                widgets_list[a_widget]['properties']['metrics'].append(metric_template_line)
 
             for a_widget in widgets_list:
                 a_widget['properties']['metrics'][self._total_pipelines][1] = channel_id
@@ -402,7 +418,7 @@ class EmlDashboard:
             # apply a filter
             channels = self.filter_channels(channels, tag_selection)
 
-        self.logit("Processing {0} channels".format(len(channels)))
+        self.logit("EmlDashboard - processing {0} channels".format(len(channels)))
         if len(channels) < 1:
             raise Exception("No matching channels found")
 
@@ -419,12 +435,11 @@ class EmlDashboard:
             EML_SVQ_widget_d
         ]
 
-        res = { "widgets" : [] }
         for channel in channels:
             # self.logit(flow)
             self._total_pipelines=self._total_pipelines + 1
-            widgets = self.get_channel_dashboard(channel, widgets_list)
-            res["widgets"].extend(widgets)
+            self.add_channel_dashboard(channel, widgets_list)
 
-        print(json.dumps(res))
+        res = { "widgets" : [] }
+        res["widgets"] = widgets_list
         return res

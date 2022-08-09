@@ -224,7 +224,7 @@ class EmxDashboard:
         return output
 
 
-    def get_flow_dashboard(self, flow, flow_row, widgets_list):
+    def add_flow_dashboard(self, flow, flow_row, widgets_list):
         """
         build dashboard for 1 flow
         """
@@ -236,16 +236,16 @@ class EmxDashboard:
 
         if flow_row == 0:
             # we are in the first line of each metric - special case due formatting needed
-            for counter in range (0, len(widgets_list) ) :
-                widgets_list[counter]['properties']['metrics'][0][3] = this_flowarn
-                widgets_list[counter]['properties']['metrics'][0][4]['label'] = this_flowname
-                widgets_list[counter]['properties']['region']= region
+            for a_widget in widgets_list:
+                a_widget['properties']['metrics'][0][3] = this_flowarn
+                a_widget['properties']['metrics'][0][4]['label'] = this_flowname
+                a_widget['properties']['region']= region
         else:
             ## we are in rows 2-N, so add a line to each metric:
-            for counter in range (0,len(widgets_list)) :
-                widgets_list[counter]['properties']['metrics'].append(metric_template_line)
-                widgets_list[counter]['properties']['metrics'][flow_row][1] = this_flowarn
-                widgets_list[counter]['properties']['metrics'][flow_row][2]['label'] = this_flowname
+            for a_widget in widgets_list:
+                a_widget['properties']['metrics'].append(metric_template_line)
+                a_widget['properties']['metrics'][flow_row][1] = this_flowarn
+                a_widget['properties']['metrics'][flow_row][2]['label'] = this_flowname
 
         return widgets_list
 
@@ -261,7 +261,7 @@ class EmxDashboard:
             # apply a filter
             flows = self.filter_flows(flows, tag_selection)
 
-        self.logit("Processing {0} channels".format(len(flows)))
+        self.logit("EmxDashboard - processing {0} channels".format(len(flows)))
         if len(flows) < 1:
             raise Exception("No matching channels found")
 
@@ -275,12 +275,11 @@ class EmxDashboard:
             EMX_SourceFECRecovered_widget_d,
             EMX_SourceContinuityCounter_widget_d
         ]
-        res = { "widgets" : [] }
-        for flow in flows:
-            # self.logit(flow)
-            flow_row=flow_row + 1
-            widgets = self.get_flow_dashboard(flow, flow_row, widgets_list)
-            res["widgets"].extend(widgets)
 
-        #print(json.dumps(res))
+        for flow in flows:
+            flow_row=flow_row + 1
+            self.add_flow_dashboard(flow, flow_row, widgets_list)
+
+        res = { "widgets" : [] }
+        res["widgets"] = widgets_list
         return res
