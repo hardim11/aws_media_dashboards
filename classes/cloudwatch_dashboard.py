@@ -53,6 +53,11 @@ class CloudwatchDashboard:
                 self._region
             )
         )
+
+        if widgets is None:
+            self.logit("No widgets supplied, not creating dashboard")
+            return
+
         self._cw_client.put_dashboard(
             DashboardName=dashboard_name,
             DashboardBody=json.dumps(widgets, indent=4)

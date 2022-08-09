@@ -263,7 +263,8 @@ class EmxDashboard:
 
         self.logit("EmxDashboard - processing {0} channels".format(len(flows)))
         if len(flows) < 1:
-            raise Exception("No matching channels found")
+            self.logit("No matching channels found")
+            return None
 
         flow_row = -1
 

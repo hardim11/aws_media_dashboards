@@ -420,7 +420,8 @@ class EmlDashboard:
 
         self.logit("EmlDashboard - processing {0} channels".format(len(channels)))
         if len(channels) < 1:
-            raise Exception("No matching channels found")
+            self.logit("No matching channels found")
+            return None
 
         # ------------------------------------------------------------------------------------
         ## Iterate through all the discovered channels

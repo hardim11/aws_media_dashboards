@@ -291,10 +291,8 @@ class EmpDashboard:
 
         self.logit("EmpDashboard - processing {0} channels".format(len(channels)))
         if len(channels) < 1:
-            raise Exception("No matching channels found")
-
-
-        #print(json.dumps(channels))
+            self.logit("No matching channels found")
+            return None
 
         ## Aggregate all the metrics dictionaries into a list of dictionaries
         widgets_list = [
