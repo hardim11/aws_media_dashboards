@@ -1,0 +1,264 @@
+{
+    "widgets": [
+        {
+            "height": 6,
+            "width": 21,
+            "y": 6,
+            "x": 0,
+            "type": "metric",
+            "properties": {
+                "metrics": [
+                    {% for item in channels %}
+                        {% if loop.first %}
+                            [ "MediaLive", "NetworkIn", "ChannelId", "{{ item.channel_id }}", "Pipeline", "{{ item.pipeline }}", { "label": "{{ item.name }}" } ]
+                        {% else %}
+                            ,
+                            [ "...", "{{ item.channel_id }}", "Pipeline", "{{ item.pipeline }}", { "label": "{{ item.name }}" } ]
+                        {% endif %}
+                    {% endfor %}
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "title": "MediaLive - AVG NetworkIn Bytes [rolling avg]",
+                "region": "{{ region }}",
+                "period": 60,
+                "stat": "Average",
+                "yAxis": {
+                    "left": {
+                        "min": 0
+                    }
+                },
+                "legend": {
+                    "position": "right"
+                }
+            }
+        },
+        {
+            "height": 6,
+            "width": 21,
+            "y": 18,
+            "x": 0,
+            "type": "metric",
+            "properties": {
+                "metrics": [
+                    {% for item in channels %}
+                        {% if loop.first %}
+                            [ "MediaLive", "InputVideoFrameRate", "ChannelId", "{{ item.channel_id }}", "Pipeline", "{{ item.pipeline }}", { "label": "{{ item.name }}" } ]
+                        {% else %}
+                            ,
+                            [ "...", "{{ item.channel_id }}", "Pipeline", "{{ item.pipeline }}", { "label": "{{ item.name }}" } ]
+                        {% endif %}
+                    {% endfor %}
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "region": "{{ region }}",
+                "period": 60,
+                "yAxis": {
+                    "left": {
+                        "min": 0,
+                        "max": 75,
+                        "label": "FPS"
+                    }
+                },
+                "stat": "Average",
+                "title": "Input Frame Rate [rolling avg]",
+                "legend": {
+                    "position": "right"
+                }
+            }
+        },
+        {
+            "height": 6,
+            "width": 21,
+            "y": 12,
+            "x": 0,
+            "type": "metric",
+            "properties": {
+                "metrics": [
+                    {% for item in channels %}
+                        {% if loop.first %}
+                            [ "MediaLive", "FillMsec", "ChannelId", "{{ item.channel_id }}", "Pipeline", "{{ item.pipeline }}", { "label": "{{ item.name }}" } ]
+                        {% else %}
+                            ,
+                            [ "...", "{{ item.channel_id }}", "Pipeline", "{{ item.pipeline }}", { "label": "{{ item.name }}" } ]
+                        {% endif %}
+                    {% endfor %}
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "region": "{{ region }}",
+                "title": "Ms of Fill frames inserted on outputs [rolling avg] - indicates possible input issue",
+                "stat": "Average",
+                "period": 60,
+                "legend": {
+                    "position": "right"
+                }
+            }
+        },
+        {
+            "height": 6,
+            "width": 21,
+            "y": 24,
+            "x": 0,
+            "type": "metric",
+            "properties": {
+                "metrics": [
+                    {% for item in channels %}
+                        {% if loop.first %}
+                            [ "MediaLive", "SvqTime", "ChannelId", "{{ item.channel_id }}", "Pipeline", "{{ item.pipeline }}", { "label": "{{ item.name }}" } ]
+                        {% else %}
+                            ,
+                            [ "...", "{{ item.channel_id }}", "Pipeline", "{{ item.pipeline }}", { "label": "{{ item.name }}" } ]
+                        {% endif %}
+                    {% endfor %}
+                ],
+                "view": "timeSeries",
+                "region": "{{ region }}",
+                "title": "Quality Reductions to maintain framerate [rolling avg] ",
+                "period": 60,
+                "liveData": true,
+                "stacked": false,
+                "yAxis": {
+                    "left": {
+                        "min": 0,
+                        "max": 10,
+                        "label": "Forced Quality Reductions"
+                    }
+                },
+                "stat": "Average",
+                "legend": {
+                    "position": "right"
+                }
+            }
+        },
+        {
+            "height": 6,
+            "width": 6,
+            "y": 0,
+            "x": 0,
+            "type": "metric",
+            "properties": {
+                "view": "timeSeries",
+                "stacked": false,
+                "metrics": [
+                    {% for item in channels %}
+                        {% if loop.first %}
+                            [ "AWS/MediaLive", "ActiveAlerts", "ChannelId", "{{ item.channel_id }}", "Pipeline", "{{ item.pipeline }}", { "label": "{{ item.name }}" } ]
+                        {% else %}
+                            ,
+                            [ "...", "{{ item.channel_id }}", "Pipeline", "{{ item.pipeline }}", { "label": "{{ item.name }}" } ]
+                        {% endif %}
+                    {% endfor %}
+                ],
+                "region": "{{ region }}",
+                "title": "Active Alerts"
+            }
+        },
+        {
+            "height": 6,
+            "width": 6,
+            "y": 0,
+            "x": 6,
+            "type": "metric",
+            "properties": {
+                "view": "timeSeries",
+                "stacked": false,
+                "metrics": [
+                    {% for item in channels %}
+                        {% if loop.first %}
+                            [ "AWS/MediaLive", "Output4xxErrors", "OutputGroupName", "PC01", "ChannelId", "{{ item.channel_id }}", "Pipeline", "{{ item.pipeline }}", { "label": "{{ item.name }}" } ]
+                        {% else %}
+                            ,
+                            [ "...", "{{ item.channel_id }}", "Pipeline", "{{ item.pipeline }}", { "label": "{{ item.name }}" } ]
+                        {% endif %}
+                    {% endfor %}
+                ],
+                "region": "{{ region }}",
+                "title": "Output Errors 4xx"
+            }
+        },
+        {
+            "height": 6,
+            "width": 6,
+            "y": 0,
+            "x": 12,
+            "type": "metric",
+            "properties": {
+                "view": "timeSeries",
+                "stacked": false,
+                "metrics": [
+                    {% for item in channels %}
+                        {% if loop.first %}
+                            [ "AWS/MediaLive", "Output5xxErrors", "OutputGroupName", "PC01", "ChannelId", "{{ item.channel_id }}", "Pipeline", "{{ item.pipeline }}", { "label": "{{ item.name }}" } ]
+                        {% else %}
+                            ,
+                            [ "...", "{{ item.channel_id }}", "Pipeline", "{{ item.pipeline }}", { "label": "{{ item.name }}" } ]
+                        {% endif %}
+                    {% endfor %}
+                ],
+                "region": "{{ region }}",
+                "title": "Output Errors 5xx"
+            }
+        }
+
+        {% for item in rtp_inputs %}
+        ,
+        {
+            "type": "metric",
+            "x": 0,
+            "y": 24,
+            "width": 21,
+            "height": 6,
+            "properties": {
+                "metrics": [
+                    [
+                        "MediaLive",
+                        "RtpPacketsReceived",
+                        "ChannelId",
+                        "{{ item.channel_id }}",
+                        "Pipeline",
+                        "{{ item.pipeline }}",
+                        {
+                            "label": "Pkts-Received_{{ item.name }}"
+                        }
+                    ],
+                    [
+                        ".",
+                        "RtpPacketsRecoveredViaFec",
+                        ".",
+                        "{{ item.channel_id }}",
+                        ".",
+                        "{{ item.pipeline }}",
+                        {
+                            "label": "Pkts-RecoveredViaFec_{{ item.name }}"
+                        }
+                    ],
+                    [
+                        ".",
+                        "RtpPacketsLost",
+                        ".",
+                        "{{ item.channel_id }}",
+                        ".",
+                        "{{ item.pipeline }}",
+                        {
+                            "label": "Pkts-Lost_{{ item.name }}"
+                        }
+                    ]
+                ],
+                "view": "singleValue",
+                "stacked": false,
+                "region": "{{ region }}",
+                "period": 60,
+                "stat": "Sum",
+                "title": "RTP Input Metrics"
+            },
+            "legend": {
+                "position": "right"
+            }
+        }
+
+        {% endfor %}
+
+    ]
+}

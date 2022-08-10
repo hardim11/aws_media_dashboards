@@ -8,272 +8,11 @@
 
 from datetime import datetime
 import boto3
+from .jinga_render import JinjaRender
 
 
 TAG_KEY="Product"
-EML_NetworkIn_widget_d = {
-    "type": "metric",
-    "x": 0,
-    "y": 6,
-    "width": 21,
-    "height": 6,
-    "properties": {
-        "metrics": [
-            [
-                "MediaLive",
-                "NetworkIn",
-                "ChannelId",
-                "firstchannelID",
-                "Pipeline",
-                "0",
-                { "label": "firstchannelID p0" }
-            ]
-        ],
-        "view": "timeSeries",
-        "stacked": False,
-        "title": "MediaLive - AVG NetworkIn Bytes [rolling avg]",
-        "region": "us-west-2",
-        "period": 60,
-        "stat": "Average",
-        "yAxis": {
-            "left": {
-                "min": 0
-            }
-        },
-        "legend": {
-            "position": "right"
-        }
-    }
-}
-EML_Fillframes_widget_d = {
-    "type": "metric",
-    "x": 0,
-    "y": 12,
-    "width": 21,
-    "height": 6,
-    "properties": {
-        "metrics": [
-            [
-                "MediaLive",
-                "FillMsec",
-                "ChannelId",
-                "firstchannelID",
-                "Pipeline",
-                "0",
-                { "label": "firstchannelID p0" }
-            ]
-        ],
-        "view": "timeSeries",
-        "stacked": False,
-        "region": "us-west-2",
-        "title":
-        "Ms of Fill frames inserted on outputs [rolling avg] - indicates possible input issue",
-        "stat": "Average",
-        "period": 60,
-        "legend": {
-            "position": "right"
-        }
-    }
-}
-EML_SVQ_widget_d = {
-    "type": "metric",
-    "x": 0,
-    "y": 18,
-    "width": 21,
-    "height": 6,
-    "properties": {
-        "metrics": [
-            [
-                "MediaLive",
-                "SvqTime",
-                "ChannelId",
-                "firstchannelID",
-                "Pipeline",
-                "0",
-                { "label": "firstchannelID p0" }
-            ]
-        ],
-        "view": "timeSeries",
-        "region": "us-west-2",
-        "title": "Quality Reductions to maintain framerate [rolling avg] ",
-        "period": 60,
-        "liveData": True,
-        "stacked": False,
-        "yAxis": {
-            "left": {
-                "min": 0,
-                "max": 10,
-                "label": "Forced Quality Reductions"
-            }
-        },
-        "stat": "Average",
-        "legend": {
-            "position": "right"
-        }
-	}
-}
-EML_InputFrmRt_widget_d = {
-    "type": "metric",
-    "x": 0,
-    "y": 18,
-    "width": 21,
-    "height": 6,
-    "properties": {
-        "metrics": [
-            [
-                "MediaLive",
-                "InputVideoFrameRate",
-                "ChannelId",
-                "firstchannelID",
-                "Pipeline",
-                "0",
-                { "label": "firstchannelID p0" }
-            ]
-        ],
-        "view": "timeSeries",
-        "stacked": False,
-        "region": "us-west-2",
-        "period": 60,
-        "yAxis": {
-            "left": {
-                "min": 0,
-                "max": 75,
-                "label": "FPS"
-            }
-        },
-        "stat": "Average",
-        "title": "Input Frame Rate [rolling avg]",
-        "legend": {
-            "position": "right"
-        }
-    }
-}
-RTP_widget_d = {
-           "type": "metric",
-            "x": 0,
-            "y": 24,
-            "width": 21,
-            "height": 6,
-            "properties": {
-    "metrics": [
-        [
-            "MediaLive",
-            "RtpPacketsReceived",
-            "ChannelId",
-            "firstchannelID",
-            "Pipeline",
-            "0",
-            { "label": "Pkts-Received_chanID_PL0" }
-        ],
-        [
-            ".",
-            "RtpPacketsRecoveredViaFec",
-            ".",
-            ".",
-            ".",
-            ".",
-            { "label": "Pkts-RecoveredViaFec_chanID_PL0" }
-        ],
-        [
-            ".",
-            "RtpPacketsLost",
-            ".",
-            ".",
-            ".",
-            ".",
-            { "label": "Pkts-Lost_chanID_PL0" }
-        ]
-    ],
-    "view": "singleValue",
-    "stacked": False,
-    "region": "us-west-2",
-    "period": 60,
-    "stat": "Sum",
-    "title": "RTP Input Metrics"
-  },
-  "legend": {
-                    "position": "right"
-                }
-}
-
-EML_Active_Alerts = {
-            "height": 6,
-            "width": 6,
-            "y": 0,
-            "x": 0,
-            "type": "metric",
-            "properties": {
-                "view": "timeSeries",
-                "stacked": False,
-                "metrics": [
-                    [
-                        "AWS/MediaLive",
-                        "ActiveAlerts",
-                        "ChannelId",
-                        "1172340",
-                        "Pipeline",
-                        "0",
-                        { "label": "firstchannelID p0" }
-                    ]
-                ],
-                "region": "eu-west-1",
-                "title": "Active Alerts"
-            }
-        }
-EML_Output_Errors_4xx = {
-            "height": 6,
-            "width": 6,
-            "y": 0,
-            "x": 6,
-            "type": "metric",
-            "properties": {
-                "view": "timeSeries",
-                "stacked": False,
-                "metrics": [
-                    [
-                        "AWS/MediaLive",
-                        "Output4xxErrors",
-                        "OutputGroupName",
-                        "PC01",
-                        "ChannelId",
-                        "1172340",
-                        "Pipeline",
-                        "0",
-                        { "label": "firstchannelID p0" }
-                    ]
-                ],
-                "region": "eu-west-1",
-                "title": "Output Errors 4xx"
-            }
-        }
-EML_Output_Errors_5xx = {
-            "height": 6,
-            "width": 6,
-            "y": 0,
-            "x": 12,
-            "type": "metric",
-            "properties": {
-                "view": "timeSeries",
-                "stacked": False,
-                "metrics": [
-                    [
-                        "AWS/MediaLive",
-                        "Output5xxErrors",
-                        "OutputGroupName",
-                        "PC01",
-                        "ChannelId",
-                        "1172340",
-                        "Pipeline",
-                        "0",
-                        { "label": "firstchannelID p0" }
-                    ]
-                ],
-                "region": "eu-west-1",
-                "title": "Output Errors 5xx"
-            }
-        }
-
-
+TEMPLATE_FILE="eml.j2"
 
 
 class EmlDashboard:
@@ -282,16 +21,14 @@ class EmlDashboard:
     """
     _logger = None
     _ml_client = None
-    _needs_rtp_widget = 0
-    _rtp_widgets_list=[]
-    _total_rtp_widgets = 0
-    _total_pipelines = -1
+    _region = ""
 
     def __init__(self, region, profile, logger=None):
         """
         constructor
         """
         self._logger = logger
+        self._region = region
 
         if profile is None:
             session = boto3.Session()
@@ -345,172 +82,71 @@ class EmlDashboard:
         return output
 
 
-    def add_channel_dashboard(self, channel, widgets_list, widget_list2):
+    def get_channel_grab_bag(self, channels):
         """
-        build dashboard for 1 flow
+        construct a grab bag for the template to use
+            channel.channel_id
+            channel.pipeline
+            channel.name
+
+            rtp_inputs.channel_id
+            rtp_inputs.pipeline
+            rtp_inputs.name
         """
-        metric_template_line = [
-            "...",
-            "nextchannelID",
-            "Pipeline",
-            "nextpipevalue",
-            { "label": "labelvalue" }
-        ]
-        metric_template_line2 = [
-            "...",
-            "nextchannelID",
-            "Pipeline",
-            "nextpipevalue",
-            { "label": "labelvalue" }
-        ]
+        grab_bag = {
+            "channels": [],
+            "rtp_inputs": [],
+            "region": self._region
+        }
 
-        channel_name = channel['Name']
-        this_flowarn = channel['Arn']
-        arn_split = this_flowarn.split(":")
-        region = arn_split[3]
-        channel_id = channel["Id"]
+        for channel in channels:
+            # extract details for pipeline 0
+            arn = channel["Arn"]
+            id = channel["Id"]
+            name = "CH:" + channel["Name"] + "_PL:0"
+            arn_split = arn.split(":")
+            region = arn_split[3]
 
-        for inputcounter in range (0,len(channel['InputAttachments'])) :
-            this_input_id = channel['InputAttachments'][inputcounter]['InputId']
-            this_input_name = channel['InputAttachments'][inputcounter]['InputAttachmentName']
+            a_channel = {
+                "name": name,
+                "arn": arn,
+                "channel_id": id,
+                "pipeline": "0",
+                "region": region
+            }
+            grab_bag["channels"].append(a_channel)
 
-            this_input_description = self._ml_client.describe_input(
-                InputId=this_input_id
-            )
+            # if a standard channel pipeline 1
+            if channel['ChannelClass'] == 'STANDARD':
+                # add pipeline 1
+                name = "CH:" + channel["Name"] + "_PL:1"
+                b_channel = {
+                    "name": name,
+                    "arn": arn,
+                    "channel_id": id,
+                    "pipeline": "1",
+                    "region": region
+                }
+                grab_bag["channels"].append(b_channel)
 
-            if this_input_description['Type']  == "RTP_PUSH" :
-                self._needs_rtp_widget = 1
+            # finally do RTP inputs
+            for input_attachment in channel['InputAttachments']:
+                # check if RTP
+                input_attachment_desc = self._ml_client.describe_input(
+                    InputId=input_attachment["InputId"]
+                )
 
-                ## add an empty element to the RTP widget list
-                rtp_widget_list = []
-                rtp_widget_list[0] = {
-                "type": "metric",
-                    "x": 0,
-                    "y": 15,
-                    "width": 9,
-                    "height": 3,
-                    "properties": {
-                        "metrics": [
-                            [
-                                "MediaLive",
-                                "RtpPacketsReceived",
-                                "ChannelId",
-                                "firstchannelID",
-                                "Pipeline",
-                                "0",
-                                { "label": "." }
-                            ],
-                            [
-                                ".",
-                                "RtpPacketsRecoveredViaFec",
-                                ".",
-                                ".",
-                                ".",
-                                ".",
-                                { "label": "." }
-                            ],
-                            [
-                                ".",
-                                "RtpPacketsLost",
-                                ".",
-                                ".",
-                                ".",
-                                ".",
-                                { "label": "." }
-                            ]
-                        ],
-                        "view": "singleValue",
-                        "stacked": "false",
-                        "region": "us-west-2",
-                        "period": 3600,
-                        "stat": "Sum",
-                        "title": "RTP Input Metrics [Total for last hr]"
-                        }
+                if input_attachment_desc['Type']  == "RTP_PUSH":
+                    # add it
+                    a_input = {
+                        "channel_id": id,
+                        "pipeline": "0",
+                        "name": channel["Name"] + "_PL:0"
                     }
+                    grab_bag["rtp_inputs"].append(a_channel)
+                    #TODO is there a pipeline 1 input?
 
-                rtp_widget_list[0]['properties']['region'] = region
-                # first line of RTP metric
-                rtp_widget_list[0]['properties']['metrics'][0][3] = channel_id
-                rtp_widget_list[0]['properties']['metrics'][0][5] = "0"
-                rtp_widget_list[0]['properties']['metrics'][0][6]['label'] = \
-                    "Pkts-Recvd_CH:"+channel_id+"_PL0"
-                ## second line of RTP Metric
-                rtp_widget_list[0]['properties']['metrics'][1][3] = channel_id
-                rtp_widget_list[0]['properties']['metrics'][1][5] = "0"
-                rtp_widget_list[0]['properties']['metrics'][1][6]['label'] = \
-                    "Pkts-RecoveredViaFec_CH:"+channel_id+"_PL0"
-                ## third line of RTP metric
-                rtp_widget_list[0]['properties']['metrics'][2][3] = channel_id
-                rtp_widget_list[0]['properties']['metrics'][2][5] = "0"
-                rtp_widget_list[0]['properties']['metrics'][2][6]['label'] = \
-                    "Pkts-Lost_CH:"+channel_id+"_PL0"
-                ## title of Metric
-                rtp_widget_list[0]['properties']['title'] = \
-                    f"RTP Packet Status for Channel:{channel_id}, Input:{this_input_name}"
-
-                self._rtp_widgets_list.append(rtp_widget_list[0])
-                self._total_rtp_widgets+=1
-
-        # handle pipeline0 first
-        this_label = "CH:" + channel_name + "_PL:0"
-        if self._total_pipelines == 0 :
-            # special case for first line of each metric due to param counts
-            for a_widget in widgets_list:
-                a_widget['properties']['metrics'][0][3] = channel_id
-                a_widget['properties']['metrics'][0][5] = "0"
-                a_widget['properties']['metrics'][0][6]['label'] = this_label
-                a_widget['properties']['region']= region
-
-            for a_widget in widget_list2:
-                a_widget['properties']['metrics'][0][5] = channel_id
-                a_widget['properties']['metrics'][0][7] = "0"
-                a_widget['properties']['metrics'][0][8]['label'] = this_label
-                a_widget['properties']['region']= region
-
-        else:
-            ## we are in rows 2-N, so add a line to each metric:
-            #print("\n","Adding a row to each widget for channel",chanID)
-            for a_widget in widgets_list:
-                a_widget['properties']['metrics'].append(metric_template_line)
-            for a_widget in widget_list2:
-                a_widget['properties']['metrics'].append(metric_template_line2)
-
-            ## now set the values
-            for a_widget in widgets_list:
-                a_widget['properties']['metrics'][self._total_pipelines][1] = channel_id
-                a_widget['properties']['metrics'][self._total_pipelines][3] = "0"
-                a_widget['properties']['metrics'][self._total_pipelines][4]['label'] = this_label
-
-            for a_widget in widget_list2:
-                a_widget['properties']['metrics'][self._total_pipelines][1] = channel_id
-                a_widget['properties']['metrics'][self._total_pipelines][3] = "0"
-                a_widget['properties']['metrics'][self._total_pipelines][4]['label'] = this_label
-
-        if channel['ChannelClass'] == 'STANDARD':
-            self._total_pipelines = self._total_pipelines + 1
-            metric_template_line = [
-                "...",
-                "nextchannelID",
-                "Pipeline",
-                "nextpipevalue",
-                { "label": "labelvalue" }
-            ]
-            thislabel = "CH:"+ channel_name + "_PL:1"
-            for a_widget in widgets_list:
-                a_widget['properties']['metrics'].append(metric_template_line)
-            for a_widget in widget_list2:
-                a_widget['properties']['metrics'].append(metric_template_line2)
-
-            for a_widget in widgets_list:
-                a_widget['properties']['metrics'][self._total_pipelines][1] = channel_id
-                a_widget['properties']['metrics'][self._total_pipelines][3] = "0"
-                a_widget['properties']['metrics'][self._total_pipelines][4]['label'] = thislabel
-            for a_widget in widget_list2:
-                a_widget['properties']['metrics'][self._total_pipelines][1] = channel_id
-                a_widget['properties']['metrics'][self._total_pipelines][3] = "0"
-                a_widget['properties']['metrics'][self._total_pipelines][4]['label'] = this_label
-
-        return widgets_list
+        return grab_bag
 
 
     def get_dashboards(self, tag_selection = ""):
@@ -529,37 +165,11 @@ class EmlDashboard:
             self.logit("No matching channels found")
             return None
 
-        # ------------------------------------------------------------------------------------
-        ## Iterate through all the discovered channels
-        # set a boolean for need RTP widget
-        self._needs_rtp_widget = 0
+        grab_bag = self.get_channel_grab_bag(channels)
 
-        ## Aggregate all the metrics dictionaries into a list of dictionaries
-        # widgets_list = [
-        #     EML_NetworkIn_widget_d,
-        #     EML_InputFrmRt_widget_d,
-        #     EML_Fillframes_widget_d,
-        #     EML_SVQ_widget_d
-        # ]
-        widgets_list = [
-            EML_NetworkIn_widget_d,
-            EML_InputFrmRt_widget_d,
-            EML_Fillframes_widget_d,
-            EML_SVQ_widget_d,
-            # EML_Output_Errors_4xx,
-            # EML_Output_Errors_5xx,
-            EML_Active_Alerts
-        ]
-        widgets_list2 = [
-            EML_Output_Errors_4xx,
-            EML_Output_Errors_5xx
-        ]
+        rendered = JinjaRender.render_template(
+            TEMPLATE_FILE,
+            grab_bag
+        )
 
-        for channel in channels:
-            # self.logit(flow)
-            self._total_pipelines=self._total_pipelines + 1
-            self.add_channel_dashboard(channel, widgets_list, widgets_list2)
-
-        res = { "widgets" : [] }
-        res["widgets"] = widgets_list + widgets_list2
-        return res
+        return rendered
