@@ -26,7 +26,7 @@ cw.publish_dashboard("MediaConnect_Flows-Python", emx_widgets)
 
 eml = EmlDashboard(AWS_REGION, AWS_PROFILE, logger)
 eml_widgets = eml.get_dashboards("")
-cw.publish_dashboard("MediaLive_Inputs-Python", eml_widgets)
+cw.publish_dashboard("MediaLive-Python", eml_widgets)
 
 emp = EmpDashboard(AWS_REGION, AWS_PROFILE, logger)
 emp_widgets = emp.get_dashboards("")

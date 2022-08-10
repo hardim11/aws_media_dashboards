@@ -14,7 +14,7 @@ TAG_KEY="Product"
 EML_NetworkIn_widget_d = {
     "type": "metric",
     "x": 0,
-    "y": 0,
+    "y": 6,
     "width": 21,
     "height": 6,
     "properties": {
@@ -48,7 +48,7 @@ EML_NetworkIn_widget_d = {
 EML_Fillframes_widget_d = {
     "type": "metric",
     "x": 0,
-    "y": 6,
+    "y": 12,
     "width": 21,
     "height": 6,
     "properties": {
@@ -78,7 +78,7 @@ EML_Fillframes_widget_d = {
 EML_SVQ_widget_d = {
     "type": "metric",
     "x": 0,
-    "y": 9,
+    "y": 18,
     "width": 21,
     "height": 6,
     "properties": {
@@ -115,7 +115,7 @@ EML_SVQ_widget_d = {
 EML_InputFrmRt_widget_d = {
     "type": "metric",
     "x": 0,
-    "y": 12,
+    "y": 18,
     "width": 21,
     "height": 6,
     "properties": {
@@ -151,7 +151,7 @@ EML_InputFrmRt_widget_d = {
 RTP_widget_d = {
            "type": "metric",
             "x": 0,
-            "y": 15,
+            "y": 24,
             "width": 21,
             "height": 6,
             "properties": {
@@ -195,6 +195,85 @@ RTP_widget_d = {
                     "position": "right"
                 }
 }
+
+EML_Active_Alerts = {
+            "height": 6,
+            "width": 6,
+            "y": 0,
+            "x": 0,
+            "type": "metric",
+            "properties": {
+                "view": "timeSeries",
+                "stacked": False,
+                "metrics": [
+                    [
+                        "AWS/MediaLive",
+                        "ActiveAlerts",
+                        "ChannelId",
+                        "1172340",
+                        "Pipeline",
+                        "0",
+                        { "label": "firstchannelID p0" }
+                    ]
+                ],
+                "region": "eu-west-1",
+                "title": "Active Alerts"
+            }
+        }
+EML_Output_Errors_4xx = {
+            "height": 6,
+            "width": 6,
+            "y": 0,
+            "x": 6,
+            "type": "metric",
+            "properties": {
+                "view": "timeSeries",
+                "stacked": False,
+                "metrics": [
+                    [
+                        "AWS/MediaLive",
+                        "Output4xxErrors",
+                        "OutputGroupName",
+                        "PC01",
+                        "ChannelId",
+                        "1172340",
+                        "Pipeline",
+                        "0",
+                        { "label": "firstchannelID p0" }
+                    ]
+                ],
+                "region": "eu-west-1",
+                "title": "Output Errors 4xx"
+            }
+        }
+EML_Output_Errors_5xx = {
+            "height": 6,
+            "width": 6,
+            "y": 0,
+            "x": 12,
+            "type": "metric",
+            "properties": {
+                "view": "timeSeries",
+                "stacked": False,
+                "metrics": [
+                    [
+                        "AWS/MediaLive",
+                        "Output5xxErrors",
+                        "OutputGroupName",
+                        "PC01",
+                        "ChannelId",
+                        "1172340",
+                        "Pipeline",
+                        "0",
+                        { "label": "firstchannelID p0" }
+                    ]
+                ],
+                "region": "eu-west-1",
+                "title": "Output Errors 5xx"
+            }
+        }
+
+
 
 
 class EmlDashboard:
@@ -266,7 +345,7 @@ class EmlDashboard:
         return output
 
 
-    def add_channel_dashboard(self, channel, widgets_list):
+    def add_channel_dashboard(self, channel, widgets_list, widget_list2):
         """
         build dashboard for 1 flow
         """
@@ -277,6 +356,14 @@ class EmlDashboard:
             "nextpipevalue",
             { "label": "labelvalue" }
         ]
+        metric_template_line2 = [
+            "...",
+            "nextchannelID",
+            "Pipeline",
+            "nextpipevalue",
+            { "label": "labelvalue" }
+        ]
+
         channel_name = channel['Name']
         this_flowarn = channel['Arn']
         arn_split = this_flowarn.split(":")
@@ -374,14 +461,27 @@ class EmlDashboard:
                 a_widget['properties']['metrics'][0][6]['label'] = this_label
                 a_widget['properties']['region']= region
 
+            for a_widget in widget_list2:
+                a_widget['properties']['metrics'][0][5] = channel_id
+                a_widget['properties']['metrics'][0][7] = "0"
+                a_widget['properties']['metrics'][0][8]['label'] = this_label
+                a_widget['properties']['region']= region
+
         else:
             ## we are in rows 2-N, so add a line to each metric:
             #print("\n","Adding a row to each widget for channel",chanID)
             for a_widget in widgets_list:
                 a_widget['properties']['metrics'].append(metric_template_line)
+            for a_widget in widget_list2:
+                a_widget['properties']['metrics'].append(metric_template_line2)
 
             ## now set the values
             for a_widget in widgets_list:
+                a_widget['properties']['metrics'][self._total_pipelines][1] = channel_id
+                a_widget['properties']['metrics'][self._total_pipelines][3] = "0"
+                a_widget['properties']['metrics'][self._total_pipelines][4]['label'] = this_label
+
+            for a_widget in widget_list2:
                 a_widget['properties']['metrics'][self._total_pipelines][1] = channel_id
                 a_widget['properties']['metrics'][self._total_pipelines][3] = "0"
                 a_widget['properties']['metrics'][self._total_pipelines][4]['label'] = this_label
@@ -397,12 +497,18 @@ class EmlDashboard:
             ]
             thislabel = "CH:"+ channel_name + "_PL:1"
             for a_widget in widgets_list:
-                widgets_list[a_widget]['properties']['metrics'].append(metric_template_line)
+                a_widget['properties']['metrics'].append(metric_template_line)
+            for a_widget in widget_list2:
+                a_widget['properties']['metrics'].append(metric_template_line2)
 
             for a_widget in widgets_list:
                 a_widget['properties']['metrics'][self._total_pipelines][1] = channel_id
                 a_widget['properties']['metrics'][self._total_pipelines][3] = "0"
                 a_widget['properties']['metrics'][self._total_pipelines][4]['label'] = thislabel
+            for a_widget in widget_list2:
+                a_widget['properties']['metrics'][self._total_pipelines][1] = channel_id
+                a_widget['properties']['metrics'][self._total_pipelines][3] = "0"
+                a_widget['properties']['metrics'][self._total_pipelines][4]['label'] = this_label
 
         return widgets_list
 
@@ -429,18 +535,31 @@ class EmlDashboard:
         self._needs_rtp_widget = 0
 
         ## Aggregate all the metrics dictionaries into a list of dictionaries
+        # widgets_list = [
+        #     EML_NetworkIn_widget_d,
+        #     EML_InputFrmRt_widget_d,
+        #     EML_Fillframes_widget_d,
+        #     EML_SVQ_widget_d
+        # ]
         widgets_list = [
             EML_NetworkIn_widget_d,
             EML_InputFrmRt_widget_d,
             EML_Fillframes_widget_d,
-            EML_SVQ_widget_d
+            EML_SVQ_widget_d,
+            # EML_Output_Errors_4xx,
+            # EML_Output_Errors_5xx,
+            EML_Active_Alerts
+        ]
+        widgets_list2 = [
+            EML_Output_Errors_4xx,
+            EML_Output_Errors_5xx
         ]
 
         for channel in channels:
             # self.logit(flow)
             self._total_pipelines=self._total_pipelines + 1
-            self.add_channel_dashboard(channel, widgets_list)
+            self.add_channel_dashboard(channel, widgets_list, widgets_list2)
 
         res = { "widgets" : [] }
-        res["widgets"] = widgets_list
+        res["widgets"] = widgets_list + widgets_list2
         return res
