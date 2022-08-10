@@ -3,7 +3,6 @@ helper function for cloudwatch dashboard
 """
 
 from datetime import datetime
-import json
 import boto3
 
 
@@ -60,5 +59,5 @@ class CloudwatchDashboard:
 
         self._cw_client.put_dashboard(
             DashboardName=dashboard_name,
-            DashboardBody=json.dumps(widgets, indent=4)
+            DashboardBody=widgets
         )

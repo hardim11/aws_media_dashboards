@@ -1,0 +1,145 @@
+{
+    "widgets": [
+        {
+            "height": 6,
+            "width": 18,
+            "y": 0,
+            "x": 0,
+            "type": "metric",
+            "properties": {
+                "metrics": [
+                    {% for item in items %}
+                        {% if loop.first %}
+                            [ "AWS/MediaConnect", "SourceBitRate", "FlowARN", "{{ item.arn }}", { "label": "{{ item.name }}" } ]
+                        {% else %}
+                            ,
+                            [ "...", "{{ item.arn }}", { "label": "{{ item.name }}" } ]
+                        {% endif %}
+                    {% endfor %}
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "region": "{{ region }}",
+                "title": "Source Bitrates",
+                "period": 60,
+                "stat": "Average"
+            }
+        },
+        {
+            "height": 6,
+            "width": 9,
+            "y": 6,
+            "x": 0,
+            "type": "metric",
+            "properties": {
+                "metrics": [
+                    {% for item in items %}
+                        {% if loop.first %}
+                            [ "AWS/MediaConnect", "SourceRecoveredPackets", "FlowARN", "{{ item.arn }}", { "label": "{{ item.name }}" } ]
+                        {% else %}
+                            ,
+                            [ "...", "{{ item.arn }}", { "label": "{{ item.name }}" } ]
+                        {% endif %}
+                    {% endfor %}
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "region": "{{ region }}",
+                "title": "Source Recovered Packets",
+                "period": 60,
+                "stat": "Average",
+                "yAxis": {
+                    "left": {
+                        "min": 0
+                    }
+                }
+            }
+        },
+        {
+            "height": 6,
+            "width": 9,
+            "y": 6,
+            "x": 9,
+            "type": "metric",
+            "properties": {
+                "metrics": [
+                    {% for item in items %}
+                        {% if loop.first %}
+                            [ "AWS/MediaConnect", "SourceNotRecoveredPackets", "FlowARN", "{{ item.arn }}", { "label": "{{ item.name }}" } ]
+                        {% else %}
+                            ,
+                            [ "...", "{{ item.arn }}", { "label": "{{ item.name }}" } ]
+                        {% endif %}
+                    {% endfor %}
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "region": "{{ region }}",
+                "title": "Source Not Recovered Packets",
+                "period": 60,
+                "stat": "Average"
+            }
+        },
+        {
+            "height": 6,
+            "width": 9,
+            "y": 12,
+            "x": 0,
+            "type": "metric",
+            "properties": {
+                "metrics": [
+                    {% for item in items %}
+                        {% if loop.first %}
+                            [ "AWS/MediaConnect", "SourceFECRecovered", "FlowARN", "{{ item.arn }}", { "label": "{{ item.name }}" } ]
+                        {% else %}
+                            ,
+                            [ "...", "{{ item.arn }}", { "label": "{{ item.name }}" } ]
+                        {% endif %}
+                    {% endfor %}
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "region": "{{ region }}",
+                "title": "Source FEC Recovered Packets",
+                "period": 60,
+                "stat": "Average",
+                "yAxis": {
+                    "left": {
+                        "min": 0
+                    }
+                }
+            }
+        },
+        {
+            "height": 6,
+            "width": 9,
+            "y": 12,
+            "x": 9,
+            "type": "metric",
+            "properties": {
+                "metrics": [
+                    {% for item in items %}
+                        {% if loop.first %}
+                            [ "AWS/MediaConnect", "SourceContinuityCounter", "FlowARN", "{{ item.arn }}", { "label": "{{ item.name }}" } ]
+                        {% else %}
+                            ,
+                            [ "...", "{{ item.arn }}", { "label": "{{ item.name }}" } ]
+                        {% endif %}
+                    {% endfor %}
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "region": "{{ region }}",
+                "title": "Source Continuity Error Counter",
+                "period": 60,
+                "yAxis": {
+                    "left": {
+                        "label": "Incorrectly Ordered or Lost Pkts",
+                        "min": 0
+                    }
+                },
+                "stat": "Average"
+            }
+        }
+    ]
+}

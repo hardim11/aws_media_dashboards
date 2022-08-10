@@ -1,0 +1,159 @@
+{
+    "widgets": [
+        {
+            "height": 6,
+            "width": 18,
+            "y": 6,
+            "x": 0,
+            "type": "metric",
+            "properties": {
+                "metrics": [
+                    {% for item in channels %}
+                        {% if loop.first %}
+                            [ "AWS/MediaPackage", "IngressBytes", "Channel", "{{ item.name }}" ]
+                        {% else %}
+                            ,
+                            [ "...", "{{ item.name }}" ]
+                        {% endif %}
+                    {% endfor %}
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "region": "{{ region }}",
+                "stat": "Average",
+                "period": 60,
+                "title": "Ingress Rate (Bytes) - All Channels",
+                "legend": {
+                    "position": "right"
+                },
+                "yAxis": {
+                    "left": {
+                        "min": 0,
+                        "label": "Bytes",
+                        "showUnits": false
+                    },
+                    "right": {
+                        "min": 0
+                    }
+                }
+            }
+        },
+        {
+            "height": 6,
+            "width": 18,
+            "y": 0,
+            "x": 0,
+            "type": "metric",
+            "properties": {
+                "metrics": [
+                    {% for item in channels %}
+                        {% if loop.first %}
+                            [ "AWS/MediaPackage", "IngressResponseTime", "Channel", "{{ item.name }}" ]
+                        {% else %}
+                            ,
+                            [ "...", "{{ item.name }}" ]
+                        {% endif %}
+                    {% endfor %}
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "region": "{{ region }}",
+                "stat": "Average",
+                "period": 60,
+                "title": "Ingress Response Times - All Channels",
+                "legend": {
+                    "position": "right"
+                },
+                "yAxis": {
+                    "left": {
+                        "min": 0,
+                        "label": "msec",
+                        "showUnits": false
+                    },
+                    "right": {
+                        "min": 0
+                    }
+                }
+            }
+        },
+        {
+            "height": 6,
+            "width": 18,
+            "y": 12,
+            "x": 0,
+            "type": "metric",
+            "properties": {
+                "metrics": [
+                    {% for item in channels %}
+                        {% if loop.first %}
+                            [ "AWS/MediaPackage", "EgressResponseTime", "Channel", "{{ item.name }}" ]
+                        {% else %}
+                            ,
+                            [ "...", "{{ item.name }}" ]
+                        {% endif %}
+                    {% endfor %}
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "region": "{{ region }}",
+                "stat": "Average",
+                "period": 60,
+                "title": "Egress Response Times - All Channels",
+                "yAxis": {
+                    "left": {
+                        "min": 0,
+                        "label": "msec",
+                        "showUnits": false
+                    },
+                    "right": {
+                        "min": 0
+                    }
+                },
+                "legend": {
+                    "position": "right"
+                }
+            }
+        }
+
+
+
+        {% for item in channels %}
+        ,
+        {
+            "height": 6,
+            "width": 9,
+            "y": 18,
+            "x": 0,
+            "type": "metric",
+            "properties": {
+                "metrics": [
+
+                    [ "AWS/MediaPackage", "EgressRequestCount", "Channel", "{{ item.name }}", "StatusCodeRange", "2xx", { "label": "2xx Successful" } ],
+                    [ "...", "4xx", { "label": "4xx Errors" } ],
+                    [ "...", "5xx", { "label": "5xx Errors" } ]
+                ],
+                "view": "timeSeries",
+                "stacked": true,
+                "region": "{{ region }}",
+                "stat": "Average",
+                "period": 60,
+                "title": "Egress Request Counts for Channel {{ item.name }}",
+                "yAxis": {
+                    "left": {
+                        "min": 0,
+                        "label": "Status Codes",
+                        "showUnits": false
+                    },
+                    "right": {
+                        "min": 0
+                    }
+                },
+                "setPeriodToTimeRange": true,
+                "legend": {
+                    "position": "bottom"
+                }
+            }
+        }
+        {% endfor %}
+    ]
+}

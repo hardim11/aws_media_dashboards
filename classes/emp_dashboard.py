@@ -7,171 +7,13 @@
 """
 
 
-import copy
+import json
 from datetime import datetime
 import boto3
-
+from .jinga_render import JinjaRender
 
 TAG_KEY="Product"
-EMP_IngressResponseTime_widget_d = {
-            "height": 6,
-            "width": 18,
-            "y": 0,
-            "x": 0,
-            "type": "metric",
-            "properties": {
-                "metrics": [
-                    [
-                        "AWS/MediaPackage",
-                        "IngressResponseTime",
-                        "Channel",
-                        "ChannelName"
-                    ]
-                ],
-                "view": "timeSeries",
-                "stacked": False,
-                "region": "us-west-2",
-                "stat": "Average",
-                "period": 60,
-                "title": "Ingress Response Times - All Channels",
-                "legend": {
-                    "position": "right"
-                },
-                "yAxis": {
-                    "left": {
-                        "min": 0,
-                        "label": "msec",
-                        "showUnits": False
-                    },
-                    "right": {
-                        "min": 0
-                    }
-                }
-            }
-}
-EMP_IngressBytes_widget_d = {
-            "height": 6,
-            "width": 18,
-            "y": 6,
-            "x": 0,
-            "type": "metric",
-            "properties": {
-                "metrics": [
-                    [
-                        "AWS/MediaPackage",
-                        "IngressBytes",
-                        "Channel",
-                        "ChannelName"
-                    ]
-                ],
-                "view": "timeSeries",
-                "stacked": False,
-                "region": "us-west-2",
-                "stat": "Average",
-                "period": 60,
-                "title": "Ingress Rate (Bytes) - All Channels",
-                "legend": {
-                    "position": "right"
-                },
-                "yAxis": {
-                    "left": {
-                        "min": 0,
-                        "label": "Bytes",
-                        "showUnits": False
-                    },
-                    "right": {
-                        "min": 0
-                    }
-                }
-            }
-}
-EMP_EgressResponseTime_widget_d = {
-            "height": 6,
-            "width": 18,
-            "y": 12,
-            "x": 0,
-            "type": "metric",
-            "properties": {
-                "metrics": [
-                    [
-                        "AWS/MediaPackage",
-                        "EgressResponseTime",
-                        "Channel",
-                        "ChannelName"
-                    ]
-                ],
-                "view": "timeSeries",
-                "stacked": False,
-                "region": "us-west-2",
-                "stat": "Average",
-                "period": 60,
-                "title": "Egress Response Times - All Channels",
-                "yAxis": {
-                    "left": {
-                        "min": 0,
-                        "label": "msec",
-                        "showUnits": False
-                    },
-                    "right": {
-                        "min": 0
-                    }
-                },
-                "legend": {
-                    "position": "right"
-                }
-            }
-        }
-EMP_EgressRequestCount_widget_d = {
-            "height": 6,
-            "width": 9,
-            "y": 18,
-            "x": 0,
-            "type": "metric",
-            "properties": {
-                "metrics": [
-                    [
-                        "AWS/MediaPackage",
-                        "EgressRequestCount",
-                        "Channel",
-                        "ChannelName",
-                        "StatusCodeRange",
-                        "2xx",
-                        { "label": "2xx Successful" }
-                    ],
-                    [
-                        "...",
-                        "4xx",
-                        { "label": "4xx Errors" }
-                    ],
-                    [
-                        "...",
-                        "5xx",
-                        { "label": "5xx Errors" }
-                    ]
-                ],
-                "view": "timeSeries",
-                "stacked": True,
-                "region": "us-west-2",
-                "stat": "Average",
-                "period": 60,
-                "title": "Egress Request Counts for Channel ",
-                "yAxis": {
-                    "left": {
-                        "min": 0,
-                        "label": "Status Codes",
-                        "showUnits": False
-                    },
-                    "right": {
-                        "min": 0
-                    }
-                },
-                "setPeriodToTimeRange": True,
-                "legend": {
-                    "position": "bottom"
-                }
-            }
- }
-
+TEMPLATE_FILE="emp.j2"
 
 class EmpDashboard:
     """
@@ -179,14 +21,14 @@ class EmpDashboard:
     """
     _logger = None
     _mp_client = None
-    _total_channels_processed = -1
-    _per_channel_widgets=[]
+    _region = ""
 
     def __init__(self, region, profile, logger=None):
         """
         constructor
         """
         self._logger = logger
+        self._region = region
 
         if profile is None:
             session = boto3.Session()
@@ -240,42 +82,31 @@ class EmpDashboard:
         return output
 
 
-    def add_channel_dashboard(self, channel, widgets_list):
+    def get_channel_grab_bag(self, channels):
         """
-        build the dashboard
+        construct a grab bag for the template to use
+            channel.channel_id
+            channel.pipeline
+            channel.name
         """
-        self._total_channels_processed = self._total_channels_processed + 1
-        # metric_template_line = [
-        #     "...",
-        #     "SecondChannelName"
-        # ]
-        channel_id = channel["Id"]
-        # channel_desc = channel["Description"]
-        # channel_name = channel_id.ljust(32, ' ')
-        # this_label = "CH:" + channel_name
-        this_flowarn = channel["Arn"]
+        grab_bag = {
+            "channels": [],
+            "region": self._region
+        }
 
-        arn_split = this_flowarn.split(":")
-        region = arn_split[3]
+        for channel in channels:
+            # extract details for pipeline 0
+            arn = channel["Arn"]
+            id = channel["Id"]
 
-        tmp=copy.deepcopy(EMP_EgressRequestCount_widget_d)
-        tmp['properties']['metrics'][0][3] = channel_id
-        tmp['properties']['title'] = \
-            EMP_EgressRequestCount_widget_d['properties']['title'] + channel_id
-        self._per_channel_widgets.append(tmp)
+            a_channel = {
+                "name": id,
+                "arn": arn,
+                "channel_id": id,
+            }
+            grab_bag["channels"].append(a_channel)
 
-        if self._total_channels_processed == 0:
-            for a_widget in widgets_list:
-                a_widget['properties']['metrics'][0][3] = channel_id
-                #AllChannelsWidgetsList[counter]['properties']['metrics'][0][6]['label'] = thislabel
-                a_widget['properties']['region'] = region
-        else:
-            for a_widget in widgets_list:
-                next_line = [
-                    "...",
-                    channel_id
-                ]
-                a_widget['properties']['metrics'].append(next_line)
+        return grab_bag
 
 
     def get_dashboards(self, tag_selection = ""):
@@ -294,21 +125,11 @@ class EmpDashboard:
             self.logit("No matching channels found")
             return None
 
-        ## Aggregate all the metrics dictionaries into a list of dictionaries
-        widgets_list = [
-            EMP_IngressBytes_widget_d,
-            EMP_IngressResponseTime_widget_d,
-            EMP_EgressResponseTime_widget_d
-        ]
+        grab_bag = self.get_channel_grab_bag(channels)
 
-        res = { "widgets" : [] }
-        for channel in channels:
-            self.add_channel_dashboard(channel, widgets_list)
+        rendered = JinjaRender.render_template(
+            TEMPLATE_FILE,
+            grab_bag
+        )
 
-        # build output
-        for a_widget in widgets_list:
-            res["widgets"].append(a_widget)
-        for a_widget in self._per_channel_widgets:
-            res["widgets"].append(a_widget)
-
-        return res
+        return rendered
