@@ -1,0 +1,31 @@
+{
+    "widgets": [
+        {% for item in items %}
+            {% if not loop.first %}
+		        ,
+            {% endif %}
+
+
+        {
+            "height": 3,
+            "width": 12,
+            "y": 0,
+            "x": 0,
+            "type": "metric",
+            "properties": {
+                "metrics": [
+                    [ "AWS/S3", "NumberOfObjects", "StorageType", "AllStorageTypes", "BucketName", "{{ item.name }}", { "label": "AllStorageTypes NumberOfObjects label" } ],
+                    [ ".", "BucketSizeBytes", ".", "StandardStorage", ".", "." ],
+                    [ "...", "GlacierStorage", ".", ".", { "label": "GlacierStorage BucketSizeBytes label" } ]
+                ],
+                "view": "singleValue",
+                "stacked": false,
+                "region": "{{ item.region }}",
+                "title": " Bucket: {{ item.name }}",
+                "period": 604800,
+                "stat": "Sum"
+            }
+        }
+        {% endfor%}
+    ]
+}

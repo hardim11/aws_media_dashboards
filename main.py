@@ -8,6 +8,8 @@ from classes.emx_dashboard import EmxDashboard
 from classes.eml_dashboard import EmlDashboard
 from classes.emp_dashboard import EmpDashboard
 from classes.emc_dashboard import EmcDashboard
+from classes.s3_dashboard import S3Dashboard
+
 
 
 # this should match the name of the local AWS cli profile
@@ -43,3 +45,8 @@ cw.publish_dashboard("MediaPackage_Channels-Python-Jinja", emp_widgets)
 emc = EmcDashboard(AWS_REGION, AWS_PROFILE, logger)
 emc_widgets = emc.get_dashboards()
 cw.publish_dashboard("MediaConvert_Channels-Python-Jinja", emc_widgets)
+
+# create and upload the Elemental Media Convert Dashboard
+s3 = S3Dashboard(AWS_REGION, AWS_PROFILE, logger)
+s3_widgets = s3.get_dashboards()
+cw.publish_dashboard("S3_Buckets-Python-Jinja", s3_widgets)

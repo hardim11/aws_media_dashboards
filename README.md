@@ -10,6 +10,7 @@ https://aws.amazon.com/blogs/media/cs-quick-and-easy-media-services-dashboards/
 * EmlDashboard - Elemental Media Live Dashboard builder
 * EmpDashboard - Elemental Media Package Dashboard builder
 * EmcDashboard - Elemental Media convert Dashboard builder
+* S3Dashboard - S3 Bucket summary
 
 I haven't done the other dashboards, yet, as I don't need them!
 
