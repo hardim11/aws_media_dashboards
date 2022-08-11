@@ -102,7 +102,7 @@ class EmlDashboard:
         for channel in channels:
             # extract details for pipeline 0
             arn = channel["Arn"]
-            id = channel["Id"]
+            channel_id = channel["Id"]
             name = "CH:" + channel["Name"] + "_PL:0"
             arn_split = arn.split(":")
             region = arn_split[3]
@@ -110,7 +110,7 @@ class EmlDashboard:
             a_channel = {
                 "name": name,
                 "arn": arn,
-                "channel_id": id,
+                "channel_id": channel_id,
                 "pipeline": "0",
                 "region": region
             }
@@ -143,7 +143,7 @@ class EmlDashboard:
                         "pipeline": "0",
                         "name": channel["Name"] + "_PL:0"
                     }
-                    grab_bag["rtp_inputs"].append(a_channel)
+                    grab_bag["rtp_inputs"].append(a_input)
                     #TODO is there a pipeline 1 input?
 
         return grab_bag

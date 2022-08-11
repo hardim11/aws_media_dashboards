@@ -1,0 +1,55 @@
+{
+	"widgets": [
+        {% for item in items %}
+            {% if not loop.first %}
+		        ,
+            {% endif %}
+
+		{
+			"height": 3,
+			"width": 12,
+			"y": {{ loop.index0 * 3 }},
+			"x": 0,
+			"type": "metric",
+			"properties": {
+				"metrics": [
+					[
+						"AWS/MediaConvert",
+						"JobsCompletedCount",
+						"Queue",
+						"{{ item.arn }}",
+						{
+							"label": "Completed Jobs-{{ item.name }}"
+						}
+					],
+					[
+						".",
+						"JobsErroredCount",
+						".",
+						"{{ item.arn }}",
+						{
+							"label": "Failed Jobs-{{ item.name }}"
+						}
+					],
+					[
+						".",
+						"JobsCanceledCount",
+						".",
+						"{{ item.arn }}",
+						{
+							"label": "Cancelled Jobs-{{ item.name }}"
+						}
+					]
+				],
+				"view": "singleValue",
+				"region": "{{ region }}",
+				"stat": "Sum",
+				"period": 86400,
+				"title": "MediaConvert Jobs Status for Queue: {{ item.name }} [Last 24H]"
+			}
+		}
+        {% endfor%}
+
+
+	]
+}

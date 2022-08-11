@@ -25,4 +25,7 @@ class JinjaRender:
             template = Template(file_.read())
 
         tmp = template.render(grab_bag)
+
+        # this will raise an exception if the json isn't valid
+        # which is probably what we want
         return json.dumps(json.loads(tmp), indent=4)

@@ -9,6 +9,7 @@ https://aws.amazon.com/blogs/media/cs-quick-and-easy-media-services-dashboards/
 * EmxDashboard - Elemental Media Connect Dashboard builder
 * EmlDashboard - Elemental Media Live Dashboard builder
 * EmpDashboard - Elemental Media Package Dashboard builder
+* EmcDashboard - Elemental Media convert Dashboard builder
 
 I haven't done the other dashboards, yet, as I don't need them!
 

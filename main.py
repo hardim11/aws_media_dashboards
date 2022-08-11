@@ -7,6 +7,8 @@ from classes.cloudwatch_dashboard import CloudwatchDashboard
 from classes.emx_dashboard import EmxDashboard
 from classes.eml_dashboard import EmlDashboard
 from classes.emp_dashboard import EmpDashboard
+from classes.emc_dashboard import EmcDashboard
+
 
 # this should match the name of the local AWS cli profile
 AWS_PROFILE="matt-root"
@@ -36,3 +38,8 @@ cw.publish_dashboard("MediaLive-Python-Jinja", eml_widgets)
 emp = EmpDashboard(AWS_REGION, AWS_PROFILE, logger)
 emp_widgets = emp.get_dashboards("")
 cw.publish_dashboard("MediaPackage_Channels-Python-Jinja", emp_widgets)
+
+# create and upload the Elemental Media Convert Dashboard
+emc = EmcDashboard(AWS_REGION, AWS_PROFILE, logger)
+emc_widgets = emc.get_dashboards()
+cw.publish_dashboard("MediaConvert_Channels-Python-Jinja", emc_widgets)
