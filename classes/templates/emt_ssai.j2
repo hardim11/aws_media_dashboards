@@ -1,0 +1,121 @@
+{
+    "widgets": [
+        {% for item in items %}
+            {% if not loop.first %}
+		        ,
+            {% endif %}
+
+                {
+                    "type": "metric",
+                    "x": 0,
+                    "y": 0,
+                    "width": 12,
+                    "height": 6,
+                    "properties": {
+                        "metrics": [
+                            [
+                                "AWS/MediaTailor",
+                                "Avail.Duration",
+                                "ConfigurationName",
+                                "{{ item.name }}"
+                            ],
+                            [
+                                "AWS/MediaTailor",
+                                "AdDecisionServer.Duration",
+                                "ConfigurationName",
+                                "{{ item.name }}"
+                            ],
+                            [
+                                "AWS/MediaTailor",
+                                "Avail.FilledDuration",
+                                "ConfigurationName",
+                                "{{ item.name }}"
+                            ]
+                        ],
+                        "view": "timeSeries",
+                        "stacked": false,
+                        "region": "{{ item.region }}",
+                        "stat": "Average",
+                        "period": 60,
+                        "title": "Duration Metrics {{ item.name }}",
+                        "yAxis": {
+                            "left": {
+                                "min": 0
+                            }
+                        },
+                        "liveData": "true"
+                    }
+                },
+                {
+                    "type": "metric",
+                    "x": 0,
+                    "y": 0,
+                    "width": 12,
+                    "height": 6,
+                    "properties": {
+                        "metrics": [
+                            [
+                                "AWS/MediaTailor",
+                                "AdDecisionServer.FillRate",
+                                "ConfigurationName",
+                                "{{ item.name }}"
+                            ],
+                            [
+                                "AWS/MediaTailor",
+                                "Avail.FillRate",
+                                "ConfigurationName",
+                                "{{ item.name }}"
+                            ]
+                        ],
+                        "view": "timeSeries",
+                        "stacked": false,
+                        "region": "{{ item.region }}",
+                        "title": "Avail.FillRate {{ item.name }}",
+                        "yAxis": {
+                            "left": {
+                                "min": 0
+                            }
+                        },
+                        "stat": "Average",
+                        "period": 60
+                    }
+                },
+                {
+                    "type": "metric",
+                    "x": 0,
+                    "y": 0,
+                    "width": 12,
+                    "height": 6,
+                    "properties": {
+                        "metrics": [
+                            [
+                                "AWS/MediaTailor",
+                                "AdDecisionServer.Ads",
+                                "ConfigurationName",
+                                "{{ item.name }}"
+                            ],
+                            [
+                                "AWS/MediaTailor",
+                                "AdDecisionServer.Latency",
+                                "ConfigurationName",
+                                "{{ item.name }}"
+                            ]
+                        ],
+                        "view": "timeSeries",
+                        "stacked": false,
+                        "region": "{{ item.region }}",
+                        "yAxis": {
+                            "left": {
+                                "min": 0
+                            }
+                        },
+                        "stat": "Average",
+                        "period": 60,
+                        "title": "AdDecisionServer Ads {{ item.name }}"
+                    }
+                }
+
+
+        {% endfor%}
+    ]
+}

@@ -1,7 +1,7 @@
 """
   a rewrite of the work by R.Clements in pure python
 
-  a simple CW dashboard maker for key Elemental Media Package metrics
+  a simple CW dashboard maker for key Elemental Media Tailor metrics
   NOT official AWS product in any way!  Just a helper script.
   R.Clements 03-2021
 """
@@ -12,14 +12,14 @@ import boto3
 from .jinga_render import JinjaRender
 
 TAG_KEY="Product"
-TEMPLATE_FILE="emp.j2"
+TEMPLATE_FILE="emt_ssai.j2"
 
-class EmpDashboard:
+class EmtSsaiDashboard:
     """
-    a class to create Elemental Media Connect dashboard
+    a class to create Elemental Media Tailor SSAI dashboard
     """
     _logger = None
-    _mp_client = None
+    _mt_client = None
     _region = ""
 
     def __init__(self, region, profile, logger=None):
@@ -35,8 +35,8 @@ class EmpDashboard:
             session = boto3.Session(profile_name=profile)
 
         # create a client
-        self._mp_client = session.client(
-          "mediapackage",
+        self._mt_client = session.client(
+          "mediatailor",
           region_name = region
         )
 
@@ -51,59 +51,57 @@ class EmpDashboard:
             self._logger(message)
 
 
-    def get_channels(self):
+    def get_campaigns(self):
         """
-        get a list of channels in this region
+        get list of campaigns in this region
         """
         # Create a reusable Paginator
-        paginator = self._mp_client.get_paginator('list_channels')
+        paginator = self._mt_client.get_paginator('list_playback_configurations')
 
         # Create a PageIterator from the Paginator
         page_iterator = paginator.paginate()
 
-        channels = []
+        campaigns = []
         for page in page_iterator:
-            channels.extend(page["Channels"])
+            campaigns.extend(page["Items"])
 
-        return channels
+        return campaigns
 
 
-    def filter_channels(self, channels, tag_selection):
+    def filter_campaigns(self, campaigns, tag_selection):
         """
         filter on tags
         """
         output = []
-        for channel in channels:
-            if TAG_KEY in channel["Tags"]:
-                if channel["Tags"][TAG_KEY] == tag_selection:
-                    output.append(channel)
+        for campaign in campaigns:
+            if TAG_KEY in campaign["Tags"]:
+                if campaign["Tags"][TAG_KEY] == tag_selection:
+                    output.append(campaign)
 
         return output
 
 
-    def get_grab_bag(self, channels):
+    def get_grab_bag(self, campaigns):
         """
         construct a grab bag for the template to use
-            channel.channel_id
-            channel.pipeline
-            channel.name
         """
         grab_bag = {
-            "channels": [],
+            "items": [],
             "region": self._region
         }
 
-        for channel in channels:
-            # extract details for pipeline 0
-            arn = channel["Arn"]
-            channel_id = channel["Id"]
-
-            a_channel = {
-                "name": id,
+        # collect the data into a dictionary
+        for campaign in campaigns:
+            #
+            arn = campaign["PlaybackConfigurationArn"]
+            arn_split = arn.split(":")
+            region = arn_split[3]
+            a_capaign = {
+                "name": campaign["Name"],
                 "arn": arn,
-                "channel_id": channel_id,
+                "region": region
             }
-            grab_bag["channels"].append(a_channel)
+            grab_bag["items"].append(a_capaign)
 
         return grab_bag
 
@@ -113,18 +111,18 @@ class EmpDashboard:
         build the dashboards
         tag_selection - if empty then all, else uses tag matching TAG_KEY
         """
-        channels = self.get_channels()
+        campaigns = self.get_campaigns()
 
         if tag_selection != "":
             # apply a filter
-            channels = self.filter_channels(channels, tag_selection)
+            campaigns = self.filter_campaigns(campaigns, tag_selection)
 
-        self.logit("EmpDashboard - processing {0} channels".format(len(channels)))
-        if len(channels) < 1:
-            self.logit("No matching channels found")
+        self.logit("EMT SSAI - processing {0} containers".format(len(campaigns)))
+        if len(campaigns) < 1:
+            self.logit("No matching campaigns found")
             return None
 
-        grab_bag = self.get_grab_bag(channels)
+        grab_bag = self.get_grab_bag(campaigns)
 
         rendered = JinjaRender.render_template(
             TEMPLATE_FILE,

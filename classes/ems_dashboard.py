@@ -12,14 +12,14 @@ import boto3
 from .jinga_render import JinjaRender
 
 TAG_KEY="Product"
-TEMPLATE_FILE="emp.j2"
+TEMPLATE_FILE="ems.j2"
 
-class EmpDashboard:
+class EmsDashboard:
     """
-    a class to create Elemental Media Connect dashboard
+    a class to create Elemental Media Store dashboard
     """
     _logger = None
-    _mp_client = None
+    _ms_client = None
     _region = ""
 
     def __init__(self, region, profile, logger=None):
@@ -35,8 +35,8 @@ class EmpDashboard:
             session = boto3.Session(profile_name=profile)
 
         # create a client
-        self._mp_client = session.client(
-          "mediapackage",
+        self._ms_client = session.client(
+          "mediastore",
           region_name = region
         )
 
@@ -51,59 +51,67 @@ class EmpDashboard:
             self._logger(message)
 
 
-    def get_channels(self):
+    def get_store_containers(self):
         """
-        get a list of channels in this region
+        get all the mediastores in this region
         """
         # Create a reusable Paginator
-        paginator = self._mp_client.get_paginator('list_channels')
+        paginator = self._ms_client.get_paginator('list_containers')
 
         # Create a PageIterator from the Paginator
         page_iterator = paginator.paginate()
 
-        channels = []
+        containers = []
         for page in page_iterator:
-            channels.extend(page["Channels"])
+            containers.extend(page["Containers"])
 
-        return channels
+        return containers
 
 
-    def filter_channels(self, channels, tag_selection):
+    def get_tags_for_container(self, container_arn):
+        """
+        get the tags for the container
+        """
+        return self._ms_client.list_tags_for_resource(
+            Resource = container_arn
+        )
+
+
+    def filter_containers(self, containers, tag_selection):
         """
         filter on tags
         """
         output = []
-        for channel in channels:
-            if TAG_KEY in channel["Tags"]:
-                if channel["Tags"][TAG_KEY] == tag_selection:
-                    output.append(channel)
+        for container in containers:
+            container_tags = self.get_tags_for_container(container["ARN"])
+            if TAG_KEY in container_tags["Tags"]:
+                if container_tags["Tags"][TAG_KEY] == tag_selection:
+                    output.append(container)
 
         return output
 
 
-    def get_grab_bag(self, channels):
+    def get_grab_bag(self, containers):
         """
         construct a grab bag for the template to use
-            channel.channel_id
-            channel.pipeline
-            channel.name
         """
         grab_bag = {
-            "channels": [],
+            "items": [],
             "region": self._region
         }
 
-        for channel in channels:
-            # extract details for pipeline 0
-            arn = channel["Arn"]
-            channel_id = channel["Id"]
-
-            a_channel = {
-                "name": id,
+        # collect the data into a dictionary
+        for container in containers:
+            #
+            arn = container["ARN"]
+            arn_split = arn.split(":")
+            region = arn_split[3]
+            a_flow = {
+                "name": container["Name"],
                 "arn": arn,
-                "channel_id": channel_id,
+                "region": region
             }
-            grab_bag["channels"].append(a_channel)
+            grab_bag["items"].append(a_flow)
 
         return grab_bag
 
@@ -113,18 +121,18 @@ class EmpDashboard:
         build the dashboards
         tag_selection - if empty then all, else uses tag matching TAG_KEY
         """
-        channels = self.get_channels()
+        containers = self.get_store_containers()
 
         if tag_selection != "":
             # apply a filter
-            channels = self.filter_channels(channels, tag_selection)
+            containers = self.filter_containers(containers, tag_selection)
 
-        self.logit("EmpDashboard - processing {0} channels".format(len(channels)))
-        if len(channels) < 1:
-            self.logit("No matching channels found")
+        self.logit("EmsDashboard - processing {0} containers".format(len(containers)))
+        if len(containers) < 1:
+            self.logit("No matching containers found")
             return None
 
-        grab_bag = self.get_grab_bag(channels)
+        grab_bag = self.get_grab_bag(containers)
 
         rendered = JinjaRender.render_template(
             TEMPLATE_FILE,
@@ -132,3 +140,4 @@ class EmpDashboard:
         )
 
         return rendered
+    

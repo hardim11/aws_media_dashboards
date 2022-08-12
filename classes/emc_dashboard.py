@@ -95,7 +95,7 @@ class EmcDashboard:
         return queues
 
 
-    def get_flow_grab_bag(self, queues):
+    def get_grab_bag(self, queues):
         """
         construct a grab bag for the template to use
         """
@@ -132,7 +132,7 @@ class EmcDashboard:
             self.logit("No matching channels found")
             return None
 
-        grab_bag = self.get_flow_grab_bag(queues)
+        grab_bag = self.get_grab_bag(queues)
 
         rendered = JinjaRender.render_template(
             TEMPLATE_FILE,

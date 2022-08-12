@@ -1,0 +1,34 @@
+{
+    "widgets": [
+        {% for item in items %}
+            {% if not loop.first %}
+		        ,
+            {% endif %}
+
+
+
+        {
+            "height": 6,
+            "width": 21,
+            "y": 0,
+            "x": 0,
+            "type": "metric",
+            "properties": {
+                "view": "timeSeries",
+                "stacked": false,
+                "metrics": [
+                    [ "AWS/CloudFront", "5xxErrorRate", "Region", "Global", "DistributionId", "{{ item.name }}", { "region": "us-east-1" } ],
+                    [ ".", "BytesDownloaded", ".", ".", ".", ".", { "region": "us-east-1" } ],
+                    [ ".", "4xxErrorRate", ".", ".", ".", ".", { "region": "us-east-1" } ],
+                    [ ".", "Requests", ".", ".", ".", ".", { "region": "us-east-1" } ]
+                ],
+                "region": "{{ region }}",
+                "title": "Distribution {{ item.name }} {{ item.description }}"
+            }
+        }
+
+
+
+        {% endfor%}
+    ]
+}

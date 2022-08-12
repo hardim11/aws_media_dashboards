@@ -1,10 +1,11 @@
 """
   a rewrite of the work by R.Clements in pure python
 
-  a simple CW dashboard maker for key Elemental MediaConnect metrics
+  a simple CW dashboard maker for key Cloudfront metrics
   NOT official AWS product in any way!  Just a helper script.
   R.Clements 03-2021
 """
+
 
 from datetime import datetime
 import boto3
@@ -12,15 +13,14 @@ from .jinga_render import JinjaRender
 
 
 TAG_KEY="Product"
-TEMPLATE_FILE="emx.j2"
+TEMPLATE_FILE="cloudfront.j2"
 
-
-class EmxDashboard:
+class CloudFrontDashboard:
     """
-    a class to create Elemental Media Connect dashboard
+    a class to create Coudfront
     """
     _logger = None
-    _mc_client = None
+    _cf_client = None
     _region = ""
 
     def __init__(self, region, profile, logger=None):
@@ -36,8 +36,8 @@ class EmxDashboard:
             session = boto3.Session(profile_name=profile)
 
         # create a client
-        self._mc_client = session.client(
-          "mediaconnect",
+        self._cf_client = session.client(
+          "cloudfront",
           region_name = region
         )
 
@@ -52,47 +52,50 @@ class EmxDashboard:
             self._logger(message)
 
 
-    def get_flows(self):
+    def get_distributions(self):
         """
-        get a list of flows in this region
+        get list of distributions
         """
         # Create a reusable Paginator
-        paginator = self._mc_client.get_paginator('list_flows')
+        paginator = self._cf_client.get_paginator('list_distributions')
 
         # Create a PageIterator from the Paginator
         page_iterator = paginator.paginate()
 
-        flows = []
+        distributions = []
         for page in page_iterator:
-            flows.extend(page["Flows"])
+            if "Items" in page["DistributionList"]:
+                print("*********************")
+                distributions.extend(page["DistributionList"]["Items"])
 
-        return flows
+        return distributions
 
 
-    def get_tags_for_flow(self, flow_arn):
+    def get_tags_for_distribution(self, distribution_arn):
         """
-        get the tags for the flow
+        get the tags for the distribution
         """
-        return self._mc_client.list_tags_for_resource(
-            ResourceArn = flow_arn
+        return self._cf_client.list_tags_for_resource(
+            Resource = distribution_arn
         )
 
 
-    def filter_flows(self, flows, tag_selection):
+    def filter_distributions(self, distributions, tag_selection):
         """
         filter on tags
         """
+        #TODO is this right? Cloudfront is different
         output = []
-        for flow in flows:
-            flow_tags = self.get_tags_for_flow(flow["FlowArn"])
-            if TAG_KEY in flow_tags["Tags"]:
-                if flow_tags["Tags"][TAG_KEY] == tag_selection:
-                    output.append(flow)
+        for distribution in distributions:
+            distribution_tags = self.get_tags_for_distribution(distribution["ARN"])
+            if TAG_KEY in distribution_tags["Tags"]["Items"]:
+                if distribution_tags["Tags"]["Items"][TAG_KEY] == tag_selection:
+                    output.append(distribution)
 
         return output
 
 
-    def get_grab_bag(self, flows):
+    def get_grab_bag(self, distributions):
         """
         construct a grab bag for the template to use
         """
@@ -102,17 +105,18 @@ class EmxDashboard:
         }
 
         # collect the data into a dictionary
-        for flow in flows:
+        for distribution in distributions:
             #
-            arn = flow["FlowArn"]
+            arn = distribution["ARN"]
             arn_split = arn.split(":")
             region = arn_split[3]
-            a_flow = {
-                "name": flow["Name"],
+            a_distribution = {
+                "name": distribution["Id"],
                 "arn": arn,
-                "region": region
+                "region": region,
+                "description": distribution["Comment"]
             }
-            grab_bag["items"].append(a_flow)
+            grab_bag["items"].append(a_distribution)
 
         return grab_bag
 
@@ -122,18 +126,18 @@ class EmxDashboard:
         build the dashboards
         tag_selection - if empty then all, else uses tag matching TAG_KEY
         """
-        flows = self.get_flows()
+        distributions = self.get_distributions()
 
         if tag_selection != "":
             # apply a filter
-            flows = self.filter_flows(flows, tag_selection)
+            distributions = self.filter_distributions(distributions, tag_selection)
 
-        self.logit("EmxDashboard - processing {0} channels".format(len(flows)))
-        if len(flows) < 1:
-            self.logit("No matching channels found")
+        self.logit("CloudFront - processing {0} channels".format(len(distributions)))
+        if len(distributions) < 1:
+            self.logit("No matching distributions found")
             return None
 
-        grab_bag = self.get_grab_bag(flows)
+        grab_bag = self.get_grab_bag(distributions)
 
         rendered = JinjaRender.render_template(
             TEMPLATE_FILE,

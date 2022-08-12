@@ -1,26 +1,25 @@
 """
   a rewrite of the work by R.Clements in pure python
 
-  a simple CW dashboard maker for key Elemental Media Live  metrics
+  a simple CW dashboard maker for key Elemental Media Tailor metrics
   NOT official AWS product in any way!  Just a helper script.
   R.Clements 03-2021
 """
+
 
 from datetime import datetime
 import boto3
 from .jinga_render import JinjaRender
 
-
 TAG_KEY="Product"
-TEMPLATE_FILE="eml.j2"
+TEMPLATE_FILE="emt_vod.j2"
 
-
-class EmlDashboard:
+class EmtVodDashboard:
     """
-    a class to create Elemental Media Live dashboard
+    a class to create Elemental Media Tailor VOD dashboard
     """
     _logger = None
-    _ml_client = None
+    _mt_client = None
     _region = ""
 
     def __init__(self, region, profile, logger=None):
@@ -36,8 +35,8 @@ class EmlDashboard:
             session = boto3.Session(profile_name=profile)
 
         # create a client
-        self._ml_client = session.client(
-          "medialive",
+        self._mt_client = session.client(
+          "mediatailor",
           region_name = region
         )
 
@@ -54,17 +53,17 @@ class EmlDashboard:
 
     def get_channels(self):
         """
-        get a list of channels in this region
+        get list of campaigns in this region
         """
         # Create a reusable Paginator
-        paginator = self._ml_client.get_paginator('list_channels')
+        paginator = self._mt_client.get_paginator('list_channels')
 
         # Create a PageIterator from the Paginator
         page_iterator = paginator.paginate()
 
         channels = []
         for page in page_iterator:
-            channels.extend(page["Channels"])
+            channels.extend(page["Items"])
 
         return channels
 
@@ -85,66 +84,24 @@ class EmlDashboard:
     def get_grab_bag(self, channels):
         """
         construct a grab bag for the template to use
-            channel.channel_id
-            channel.pipeline
-            channel.name
-
-            rtp_inputs.channel_id
-            rtp_inputs.pipeline
-            rtp_inputs.name
         """
         grab_bag = {
-            "channels": [],
-            "rtp_inputs": [],
+            "items": [],
             "region": self._region
         }
 
+        # collect the data into a dictionary
         for channel in channels:
-            # extract details for pipeline 0
+            #
             arn = channel["Arn"]
-            channel_id = channel["Id"]
-            name = "CH:" + channel["Name"] + "_PL:0"
             arn_split = arn.split(":")
             region = arn_split[3]
-
             a_channel = {
-                "name": name,
+                "name": channel["ChannelName"],
                 "arn": arn,
-                "channel_id": channel_id,
-                "pipeline": "0",
                 "region": region
             }
-            grab_bag["channels"].append(a_channel)
-
-            # if a standard channel pipeline 1
-            if channel['ChannelClass'] == 'STANDARD':
-                # add pipeline 1
-                name = "CH:" + channel["Name"] + "_PL:1"
-                b_channel = {
-                    "name": name,
-                    "arn": arn,
-                    "channel_id": id,
-                    "pipeline": "1",
-                    "region": region
-                }
-                grab_bag["channels"].append(b_channel)
-
-            # finally do RTP inputs
-            for input_attachment in channel['InputAttachments']:
-                # check if RTP
-                input_attachment_desc = self._ml_client.describe_input(
-                    InputId=input_attachment["InputId"]
-                )
-
-                if input_attachment_desc['Type']  == "RTP_PUSH":
-                    # add it
-                    a_input = {
-                        "channel_id": id,
-                        "pipeline": "0",
-                        "name": channel["Name"] + "_PL:0"
-                    }
-                    grab_bag["rtp_inputs"].append(a_input)
-                    #TODO is there a pipeline 1 input?
+            grab_bag["items"].append(a_channel)
 
         return grab_bag
 
@@ -160,7 +117,7 @@ class EmlDashboard:
             # apply a filter
             channels = self.filter_channels(channels, tag_selection)
 
-        self.logit("EmlDashboard - processing {0} channels".format(len(channels)))
+        self.logit("EMT VOD - processing {0} channels".format(len(channels)))
         if len(channels) < 1:
             self.logit("No matching channels found")
             return None

@@ -1,0 +1,81 @@
+{
+    "widgets": [
+        {% for item in items %}
+            {% if not loop.first %}
+		        ,
+            {% endif %}
+
+
+            {
+                "type": "metric",
+                "x": 0,
+                "y": 0,
+                "width": 24,
+                "height": 6,
+                "properties": {
+                    "metrics": [
+                        [
+                            "AWS/MediaStore",
+                            "RequestCount",
+                            "ContainerName",
+                            "{{ item.name}}",
+                            "RequestType",
+                            "PutRequests"
+                        ],
+                        [
+                            ".",
+                            "4xxErrorCount",
+                            ".",
+                            ".",
+                            ".",
+                            "GetRequests"
+                        ],
+                        [
+                            ".",
+                            "RequestCount",
+                            ".",
+                            ".",
+                            ".",
+                            "."
+                        ],
+                        [
+                            ".",
+                            "BytesUploaded",
+                            ".",
+                            ".",
+                            {
+                                "yAxis": "right"
+                            }
+                        ],
+                        [
+                            ".",
+                            "BytesDownloaded",
+                            ".",
+                            ".",
+                            {
+                                "yAxis": "right"
+                            }
+                        ]
+                    ],
+                    "view": "timeSeries",
+                    "stacked": false,
+                    "region": "{{ item.region }}",
+                    "stat": "Average",
+                    "period": 60,
+                    "title": "Container Metrics: {{ item.name}}",
+                    "yAxis": {
+                        "left": {
+                            "min": 0,
+                            "label": "Counts"
+                        },
+                        "right": {
+                            "min": 0,
+                            "label": "Bytes"
+                        }
+                    }
+                }
+            }
+
+        {% endfor%}
+    ]
+}

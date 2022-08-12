@@ -1,0 +1,78 @@
+{
+    "widgets": [
+        {% for item in items %}
+            {% if not loop.first %}
+		        ,
+            {% endif %}
+
+            {
+                "height": 6,
+                "width": 18,
+                "y": 0,
+                "x": 0,
+                "type": "metric",
+                "properties": {
+                    "metrics": [
+                        [
+                            "AWS/MediaTailor",
+                            "RequestCount",
+                            "ChannelName",
+                            "{{ item.name }}",
+                            {
+                                "id": "m1"
+                            }
+                        ],
+                        [
+                            ".",
+                            "4xxErrorCount",
+                            ".",
+                            ".",
+                            {
+                                "yAxis": "right",
+                                "id": "m2"
+                            }
+                        ],
+                        [
+                            ".",
+                            "5xxErrorCount",
+                            ".",
+                            ".",
+                            {
+                                "yAxis": "right",
+                                "id": "m3"
+                            }
+                        ]
+                    ],
+                    "view": "timeSeries",
+                    "stacked": false,
+                    "region": "{{ item.region }}",
+                    "period": 60,
+                    "stat": "Average",
+                    "title": "VOD CH: {{ item.name }}",
+                    "liveData": "true",
+                    "legend": {
+                        "position": "right"
+                    },
+                    "yAxis": {
+                        "right": {
+                            "min": 0,
+                            "showUnits": false
+                        },
+                        "left": {
+                            "showUnits": false,
+                            "min": 0
+                        }
+                    }
+                }
+            }
+
+
+
+        {% endfor%}
+    ]
+}
+
+
+
+
+

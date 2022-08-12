@@ -1,0 +1,118 @@
+{
+    "widgets": [
+        {% for item in items %}
+            {% if not loop.first %}
+		        ,
+            {% endif %}
+
+
+
+                [
+                    {
+                        "type": "metric",
+                        "x": 0,
+                        "y": 0,
+                        "width": 18,
+                        "height": 6,
+                        "properties": {
+                            "metrics": [
+                                [
+                                    "AWS/IVS",
+                                    "LiveDeliveredTime",
+                                    "Channel",
+                                    "{{ item.channel_id }}",
+                                    {
+                                        "label": "LiveDeliveredTime"
+                                    }
+                                ]
+                            ],
+                            "view": "timeSeries",
+                            "stacked": false,
+                            "region": "{{ item.region }}",
+                            "stat": "Average",
+                            "period": 60,
+                            "yAxis": {
+                                "left": {
+                                    "min": 0,
+                                    "label": "Seconds ( 1m avg)",
+                                    "showUnits": false
+                                }
+                            },
+                            "title": "Live Delivered Time Metrics for Channel: {{ item.channel_id }}"
+                        }
+                    },
+                    {
+                        "type": "metric",
+                        "x": 0,
+                        "y": 0,
+                        "width": 18,
+                        "height": 6,
+                        "properties": {
+                            "metrics": [
+                                [
+                                    "AWS/IVS",
+                                    "ConcurrentStreams",
+                                    "Channel",
+                                    "{{ item.channel_id }}",
+                                    {
+                                        "label": "ConcurrentStreams"
+                                    }
+                                ]
+                            ],
+                            "view": "timeSeries",
+                            "stacked": false,
+                            "region": "{{ item.region }}",
+                            "stat": "Average",
+                            "period": 60,
+                            "yAxis": {
+                                "left": {
+                                    "min": 0,
+                                    "label": "Seconds ( 1m avg)",
+                                    "showUnits": false
+                                }
+                            },
+                            "title": "ConcurrentStreams for Channel: {{ item.channel_id }}"
+                        }
+                    },
+                    {
+                        "type": "metric",
+                        "x": 0,
+                        "y": 0,
+                        "width": 18,
+                        "height": 6,
+                        "properties": {
+                            "metrics": [
+                                [
+                                    "AWS/IVS",
+                                    "ConcurrentViews",
+                                    "Channel",
+                                    "{{ item.channel_id }}",
+                                    {
+                                        "label": "ConcurrentViews"
+                                    }
+                                ]
+                            ],
+                            "view": "timeSeries",
+                            "stacked": false,
+                            "region": "{{ item.region }}",
+                            "stat": "Average",
+                            "period": 60,
+                            "yAxis": {
+                                "left": {
+                                    "min": 0,
+                                    "label": "Seconds ( 1m avg)",
+                                    "showUnits": false
+                                }
+                            },
+                            "title": "ConcurrentStreams for Channel: {{ item.channel_id }}"
+                        }
+                    }
+                ]
+
+
+
+
+
+        {% endfor%}
+    ]
+}
