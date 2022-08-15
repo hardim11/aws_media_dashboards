@@ -99,7 +99,7 @@ class EmpDashboard:
             channel_id = channel["Id"]
 
             a_channel = {
-                "name": id,
+                "name": channel_id,
                 "arn": arn,
                 "channel_id": channel_id,
             }
